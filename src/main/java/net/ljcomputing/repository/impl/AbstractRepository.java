@@ -112,6 +112,10 @@ public abstract class AbstractRepository<T extends Model>
   protected PreparedStatement obtainPreparedStatement(final String sql)
       throws PersistenceException {
     try {
+      if(null == conn) {
+        obtainConnection();
+      }
+      
       return conn.prepareStatement(sql);
     } catch (SQLException exception) {
       throw new PersistenceException(exception);
