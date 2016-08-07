@@ -2,8 +2,10 @@
 #set( $symbol_dollar = '$' )
 #set( $symbol_escape = '\' )
 
-README for module ${artifactId}
-===============================
+README for net.ljcomputing.persistence
+=======================================
 
-This module belongs to the project ${rootArtifactId}
+LJ Computing - Persistence
+--------------------------
 
+LJ Computing persistence implementation.
