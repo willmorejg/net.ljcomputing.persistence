@@ -52,9 +52,6 @@ public abstract class AbstractRepository<T extends Model>
   private static final Logger LOGGER = LoggerFactory
       .getLogger(AbstractRepository.class);
 
-  /** The connection pool. */
-  protected final ConnectionPool cp;
-
   /** The entity populator. */
   protected final EntityPopulator ep;
 
@@ -76,9 +73,7 @@ public abstract class AbstractRepository<T extends Model>
   public AbstractRepository(final DataSourceTable table)
           throws PersistenceException {
     this.table = table;
-    this.cp = ConnectionPool.getInstance();
     this.ep = new EntityPopulatorImpl();
-    obtainConnection();
   }
 
   /**
@@ -99,7 +94,7 @@ public abstract class AbstractRepository<T extends Model>
    * @throws PersistenceException the persistence exception
    */
   protected void obtainConnection() throws PersistenceException {
-    conn = cp.getConnection();
+    conn = ConnectionPool.getInstance().getConnection();
   }
 
   /**
@@ -112,7 +107,8 @@ public abstract class AbstractRepository<T extends Model>
   protected PreparedStatement obtainPreparedStatement(final String sql)
       throws PersistenceException {
     try {
-      if(null == conn) {
+      //verify we have a connection, and it is opened
+      if(null == conn || conn.isClosed()) {
         obtainConnection();
       }
       
@@ -157,6 +153,8 @@ public abstract class AbstractRepository<T extends Model>
     int key = -1;
 
     try {
+      obtainConnection();
+      
       ps = conn.prepareStatement(
           SqlUtils.buildInsertStatement(table.getTableName(), columns),
           Statement.RETURN_GENERATED_KEYS);

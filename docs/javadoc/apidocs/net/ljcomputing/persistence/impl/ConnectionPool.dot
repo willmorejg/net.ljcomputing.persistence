@@ -9,21 +9,12 @@ digraph G {
 	node [fontname="Helvetica",fontsize=10,shape=plaintext];
 	nodesep=0.25;
 	ranksep=0.5;
-	// net.ljcomputing.repository.impl.AbstractRepository<T extends net.ljcomputing.model.Model>
-	c63 [label=<<table title="net.ljcomputing.repository.impl.AbstractRepository" border="0" cellborder="1" cellspacing="0" cellpadding="2" port="p" href="../../repository/impl/AbstractRepository.html">
-		<tr><td><table border="0" cellspacing="0" cellpadding="1">
-<tr><td align="center" balign="center"><font face="Helvetica-Oblique"> AbstractRepository&lt;T extends net.ljcomputing.model.Model&gt; </font></td></tr>
-<tr><td align="center" balign="center"><font point-size="7.0"> net.ljcomputing.repository.impl </font></td></tr>
-		</table></td></tr>
-		</table>>, URL="../../repository/impl/AbstractRepository.html", fontname="Helvetica", fontcolor="black", fontsize=9.0];
 	// net.ljcomputing.persistence.impl.ConnectionPool
 	c65 [label=<<table title="net.ljcomputing.persistence.impl.ConnectionPool" border="0" cellborder="1" cellspacing="0" cellpadding="2" port="p" bgcolor="lemonChiffon" href="./ConnectionPool.html">
 		<tr><td><table border="0" cellspacing="0" cellpadding="1">
 <tr><td align="center" balign="center"> ConnectionPool </td></tr>
 		</table></td></tr>
 		</table>>, URL="./ConnectionPool.html", fontname="Helvetica", fontcolor="black", fontsize=9.0];
-	// net.ljcomputing.repository.impl.AbstractRepository<T extends net.ljcomputing.model.Model> NAVASSOC net.ljcomputing.persistence.impl.ConnectionPool
-	c63:p -> c65:p [taillabel="", label="", headlabel="", fontname="Helvetica", fontcolor="black", fontsize=10.0, color="black", arrowhead=open];
 	// net.ljcomputing.persistence.impl.ConnectionPool NAVASSOC org.apache.commons.dbcp2.BasicDataSource
 	c65:p -> c85:p [taillabel="", label="", headlabel="", fontname="Helvetica", fontcolor="black", fontsize=10.0, color="black", arrowhead=open];
 	// org.apache.commons.dbcp2.BasicDataSource

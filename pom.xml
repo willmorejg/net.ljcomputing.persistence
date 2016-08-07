@@ -19,6 +19,7 @@
 
   <net.ljcomputing.utility.version>utility-1.0.0</net.ljcomputing.utility.version>
   <net.ljcomputing.model.version>model-1.0.0</net.ljcomputing.model.version>
+  <junit.version>4.12</junit.version>
   <derby.version>10.12.1.1</derby.version>
   <commons-dbcp2.version>2.0.1</commons-dbcp2.version>
   <commons-lang3.version>3.4</commons-lang3.version>
@@ -85,6 +86,12 @@
    <groupId>com.github.willmorejg</groupId>
    <artifactId>net.ljcomputing.model</artifactId>
    <version>${net.ljcomputing.model.version}</version>
+  </dependency>
+
+  <dependency>
+   <groupId>junit</groupId>
+   <artifactId>junit</artifactId>
+   <version>${junit.version}</version>
   </dependency>
 
   <dependency>
