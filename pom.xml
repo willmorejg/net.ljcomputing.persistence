@@ -4,7 +4,7 @@
 
  <groupId>net.ljcomputing</groupId>
  <artifactId>persistence</artifactId>
- <version>1.0.2-SNAPSHOT</version>
+ <version>1.0.3-SNAPSHOT</version>
 
  <name>LJ Computing - Persistence</name>
  <description>LJ Computing Persistence</description>
