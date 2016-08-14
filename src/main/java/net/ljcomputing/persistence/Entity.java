@@ -29,11 +29,12 @@ import java.sql.ResultSet;
 public interface Entity {
 
   /**
-   * Populate the entity from a result set.
+   * Populate.
    *
-   * @param ep the ep
-   * @param rs the rs
+   * @param entityPopulator the entity populator
+   * @param resultSet the result set
    * @throws PersistenceException the persistence exception
    */
-  void populate(EntityPopulator ep, ResultSet rs) throws PersistenceException;
+  void populate(EntityPopulator entityPopulator, ResultSet resultSet)
+      throws PersistenceException;
 }

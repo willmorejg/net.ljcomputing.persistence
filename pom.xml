@@ -17,8 +17,8 @@
 
   <github.username>willmorejg</github.username>
 
-  <net.ljcomputing.utility.version>utility-1.0.0</net.ljcomputing.utility.version>
-  <net.ljcomputing.model.version>model-1.0.0</net.ljcomputing.model.version>
+  <net.ljcomputing.utility.version>utility-1.0.1</net.ljcomputing.utility.version>
+  <net.ljcomputing.model.version>model-1.0.1</net.ljcomputing.model.version>
   <junit.version>4.12</junit.version>
   <derby.version>10.12.1.1</derby.version>
   <commons-dbcp2.version>2.0.1</commons-dbcp2.version>
@@ -68,10 +68,12 @@
  </distributionManagement>
 
  <repositories>
+
   <repository>
    <id>jitpack.io</id>
    <url>https://jitpack.io</url>
   </repository>
+
  </repositories>
 
  <dependencies>

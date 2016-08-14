@@ -24,7 +24,7 @@ import java.util.List;
 /**
  * Model repository interface.
  *
- * @author James G. Willmore
+ * @author James G. Willmore 
  * @param <T> the Model associated with the repository
  */
 public interface ModelRepository<T extends Model> {
@@ -48,7 +48,7 @@ public interface ModelRepository<T extends Model> {
   void update(T model, String... columns) throws PersistenceException;
 
   /**
-   * Delete the model with the given id.
+   * Delete a model by id.
    *
    * @param id the id
    * @throws PersistenceException the persistence exception
@@ -73,7 +73,7 @@ public interface ModelRepository<T extends Model> {
   T readById(Integer id) throws PersistenceException;
 
   /**
-   * Read all models.
+   * Read all the models.
    *
    * @return the list
    * @throws PersistenceException the persistence exception

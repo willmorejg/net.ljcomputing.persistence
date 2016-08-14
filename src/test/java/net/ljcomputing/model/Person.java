@@ -51,7 +51,7 @@ public class Person extends AbstractModel implements Model, Entity {
    * @param name the name
    */
   public Person(Integer id, String name) {
-    this.id = id;
+    setId(id);
     this.name = name;
   }
 

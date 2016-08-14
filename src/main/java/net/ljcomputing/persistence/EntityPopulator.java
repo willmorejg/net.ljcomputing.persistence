@@ -28,7 +28,7 @@ import java.sql.ResultSet;
 public interface EntityPopulator {
 
   /**
-   * Populate the entity from a result set.
+   * Populate.
    *
    * @param entity the entity
    * @param resultSet the result set

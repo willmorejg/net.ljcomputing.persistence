@@ -15,9 +15,9 @@
  */
 
 /**
- * Package containing persistence interfaces.
+ * Package containing persistence Exceptions.
  * 
  * @author James G. Willmore
  *
  */
-package net.ljcomputing.persistence;
+package net.ljcomputing.exception;

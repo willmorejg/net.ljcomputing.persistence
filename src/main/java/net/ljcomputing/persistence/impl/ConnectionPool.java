@@ -18,6 +18,9 @@ package net.ljcomputing.persistence.impl;
 
 import net.ljcomputing.exception.PersistenceException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -32,15 +35,19 @@ import org.apache.commons.dbcp2.BasicDataSource;
  *
  * @author James G. Willmore
  */
-public class ConnectionPool {
-  /** The Constant INSTANCE. */
+public final class ConnectionPool {
+  /** SLF4J logger. */
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(ConnectionPool.class);
+
+  /** The instance of the connection pool. */
   private static final ConnectionPool INSTANCE = new ConnectionPool();
 
   /** The properties. */
-  private static Properties properties;
+  private transient Properties properties;
 
-  /** The bds. */
-  private final BasicDataSource bds = new BasicDataSource();
+  /** The Basic Data Source. */
+  private transient final BasicDataSource BDS = new BasicDataSource();
 
   /**
    * Instantiates a new connection pool.
@@ -48,20 +55,20 @@ public class ConnectionPool {
   private ConnectionPool() {
     if (null == properties) {
       properties = new Properties();
-
-      try {
-        properties.load(ConnectionPool.class.getClassLoader()
-            .getResourceAsStream("database.properties"));
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
     }
 
-    bds.setDriverClassName(properties.getProperty("cp.driver.class"));
-    bds.setUrl(properties.getProperty("cp.db.url"));
-    bds.setUsername(properties.getProperty("cp.db.user"));
-    bds.setPassword(properties.getProperty("cp.db.password"));
-    bds.setInitialSize(Integer.valueOf(properties.getProperty("cp.size")));
+    try {
+      properties.load(Thread.currentThread().getContextClassLoader()
+          .getResourceAsStream("database.properties"));
+
+      BDS.setDriverClassName(properties.getProperty("cp.driver.class"));
+      BDS.setUrl(properties.getProperty("cp.db.url"));
+      BDS.setUsername(properties.getProperty("cp.db.user"));
+      BDS.setPassword(properties.getProperty("cp.db.password"));
+      BDS.setInitialSize(Integer.valueOf(properties.getProperty("cp.size")));
+    } catch (IOException exception) {
+      LOGGER.error("Cannot instniate Connection Pool: ", exception);
+    }
   }
 
   /**
@@ -79,7 +86,7 @@ public class ConnectionPool {
    * @return the data source
    */
   public DataSource dataSource() {
-    return bds;
+    return BDS;
   }
 
   /**
@@ -90,7 +97,7 @@ public class ConnectionPool {
    */
   public Connection getConnection() throws PersistenceException {
     try {
-      return bds.getConnection();
+      return BDS.getConnection();
     } catch (SQLException exception) {
       throw new PersistenceException(exception);
     }

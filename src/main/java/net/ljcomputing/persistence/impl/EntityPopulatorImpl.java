@@ -26,8 +26,8 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 
 /**
- * Implementation of an entity populator, 
- * which populates entities from a result set.
+ * Implementation of an entity populator, which populates entities from a result
+ * set.
  * 
  * @author James G. Willmore
  *
@@ -40,7 +40,8 @@ public class EntityPopulatorImpl implements EntityPopulator {
   public void populate(final Object entity, final ResultSet resultSet)
       throws PersistenceException {
     try {
-      final int columnCount = getResultSetMetaData(resultSet).getColumnCount() + 1;
+      final int columnCount = getResultSetMetaData(resultSet).getColumnCount()
+          + 1;
 
       for (int column = 1; column < columnCount; column++) {
         populateMember(entity, resultSet, column);
@@ -77,21 +78,16 @@ public class EntityPopulatorImpl implements EntityPopulator {
   private void populateMember(final Object entity, final ResultSet resultSet,
       final int column) throws PersistenceException {
     try {
-      final ResultSetMetaData rsmd = getResultSetMetaData(resultSet); 
+      final ResultSetMetaData rsmd = getResultSetMetaData(resultSet);
       final String columnName = rsmd.getColumnName(column);
       final String fieldName = StringUtils.toMemberCase(columnName);
       final Class<?> entityClass = entity.getClass();
       final Field member = getEntityMember(entityClass, fieldName);
-      
+
       member.setAccessible(true);
       member.set(entity, resultSet.getObject(column));
-    } catch (SecurityException exception) {
-      throw new PersistenceException(exception);
-    } catch (IllegalArgumentException exception) {
-      throw new PersistenceException(exception);
-    } catch (IllegalAccessException exception) {
-      throw new PersistenceException(exception);
-    } catch (SQLException exception) {
+    } catch (SecurityException | IllegalArgumentException
+        | IllegalAccessException | SQLException exception) {
       throw new PersistenceException(exception);
     }
   }

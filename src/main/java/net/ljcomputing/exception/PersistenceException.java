@@ -66,11 +66,11 @@ public class PersistenceException extends Exception {
    *
    * @param message the message
    * @param cause the cause
-   * @param enableSuppression the enable suppression
-   * @param writableStackTrace the writable stack trace
+   * @param suppression the suppression
+   * @param stackTrace the stack trace
    */
   public PersistenceException(final String message, final Throwable cause,
-      final boolean enableSuppression, final boolean writableStackTrace) {
-    super(message, cause, enableSuppression, writableStackTrace);
+      final boolean suppression, final boolean stackTrace) {
+    super(message, cause, suppression, stackTrace);
   }
 }

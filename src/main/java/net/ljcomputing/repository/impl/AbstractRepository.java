@@ -1,7 +1,7 @@
 /**
            Copyright 2016, James G. Willmore
 
-   Licensed under the Apache License, Version 2.0 (the "License");
+   Licensed under the Apache License, VeresultSetion 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
 
@@ -21,6 +21,7 @@ import net.ljcomputing.StringUtils;
 import net.ljcomputing.exception.PersistenceException;
 import net.ljcomputing.model.Model;
 import net.ljcomputing.persistence.DataSourceTable;
+import net.ljcomputing.persistence.Entity;
 import net.ljcomputing.persistence.EntityPopulator;
 import net.ljcomputing.persistence.impl.ConnectionPool;
 import net.ljcomputing.persistence.impl.EntityPopulatorImpl;
@@ -28,7 +29,6 @@ import net.ljcomputing.persistence.impl.EntityPopulatorImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -42,27 +42,31 @@ import java.util.List;
  * Abstract repository implementation.
  *
  * @author James G. Willmore
+ *
  * @param <T> the Model associated with the repository
  */
 public abstract class AbstractRepository<T extends Model>
     implements ModelRepository<T> {
+
+ /** The SLF4J logger. */
+ @SuppressWarnings("unused")
+ private static final Logger LOGGER = 
+   LoggerFactory.getLogger(AbstractRepository.class);
+
+  /** The primary key field. */
+  private static final String PRIMARY_KEY = "id";
   
-  /** The Constant LOGGER. */
-  @SuppressWarnings("unused")
-  private static final Logger LOGGER = LoggerFactory
-      .getLogger(AbstractRepository.class);
-
   /** The entity populator. */
-  protected final EntityPopulator ep;
-
+  protected transient final EntityPopulator entityPopulator;
+  
   /** The connection. */
-  protected Connection conn;
-
+  protected transient Connection connection;
+  
   /** The prepared statement. */
-  protected PreparedStatement ps;
-
+  protected transient PreparedStatement preparedStatement;
+  
   /** The associated data source table. */
-  protected DataSourceTable table;
+  protected transient DataSourceTable table;
 
   /**
    * Instantiates a new abstract repository.
@@ -71,21 +75,24 @@ public abstract class AbstractRepository<T extends Model>
    * @throws PersistenceException the persistence exception
    */
   public AbstractRepository(final DataSourceTable table)
-          throws PersistenceException {
+      throws PersistenceException {
     this.table = table;
-    this.ep = new EntityPopulatorImpl();
+    this.entityPopulator = new EntityPopulatorImpl();
   }
 
   /**
-   * Gets the constructor.
+   * Gets the model instance.
    *
-   * @return the constructor
-   * @throws Exception the exception
+   * @return the model instance
+   * @throws NoSuchMethodException the no such method exception
+   * @throws SecurityException the security exception
+   * @throws InstantiationException the instantiation exception
+   * @throws IllegalAccessException the illegal access exception
    */
   @SuppressWarnings("unchecked")
-  protected Constructor<T> getConstructor() throws Exception {
-    return (Constructor<T>) table.getModel()
-        .getConstructor(new Class[] { EntityPopulator.class, ResultSet.class });
+  protected T getModelInstance() throws NoSuchMethodException,
+      SecurityException, InstantiationException, IllegalAccessException {
+    return (T) table.getModel().newInstance();
   }
 
   /**
@@ -94,7 +101,7 @@ public abstract class AbstractRepository<T extends Model>
    * @throws PersistenceException the persistence exception
    */
   protected void obtainConnection() throws PersistenceException {
-    conn = ConnectionPool.getInstance().getConnection();
+    connection = ConnectionPool.getInstance().getConnection();
   }
 
   /**
@@ -107,12 +114,12 @@ public abstract class AbstractRepository<T extends Model>
   protected PreparedStatement obtainPreparedStatement(final String sql)
       throws PersistenceException {
     try {
-      //verify we have a connection, and it is opened
-      if(null == conn || conn.isClosed()) {
+      // verify we have a connection, and it is opened
+      if (null == connection || connection.isClosed()) {
         obtainConnection();
       }
-      
-      return conn.prepareStatement(sql);
+
+      return connection.prepareStatement(sql);
     } catch (SQLException exception) {
       throw new PersistenceException(exception);
     }
@@ -122,10 +129,10 @@ public abstract class AbstractRepository<T extends Model>
    * Close prepared statement.
    */
   protected void closePreparedStatement() {
-    if (null != ps) {
+    if (null != preparedStatement) {
       try {
-        ps.close();
-      } catch (Exception exception) {
+        preparedStatement.close();
+      } catch (SQLException exception) {
         // do nothing
       }
     }
@@ -135,55 +142,56 @@ public abstract class AbstractRepository<T extends Model>
    * Close connection.
    */
   protected void closeConnection() {
-    if (null != conn) {
+    if (null != connection) {
       try {
-        conn.close();
-      } catch (Exception exception) {
+        connection.close();
+      } catch (SQLException exception) {
         // do nothing
       }
     }
   }
 
   /**
+   * Creates the.
+   *
+   * @param model the model
+   * @param columns the columns
+   * @throws PersistenceException the persistence exception
    * @see net.ljcomputing.repository.impl.ModelRepository#create(net.ljcomputing.model.Model, java.lang.String[])
    */
   public void create(final T model, final String... columns)
       throws PersistenceException {
-    ResultSet rs = null;
+    ResultSet resultSet = null;
     int key = -1;
 
     try {
       obtainConnection();
-      
-      ps = conn.prepareStatement(
+
+      preparedStatement = connection.prepareStatement(
           SqlUtils.buildInsertStatement(table.getTableName(), columns),
           Statement.RETURN_GENERATED_KEYS);
 
       for (int c = 0; c < columns.length; c++) {
-        try {
-          ps.setObject(c + 1, getModelValue(model, columns[c]));
-        } catch (Exception e) {
-          throw new SQLException(e);
-        }
+        preparedStatement.setObject(c + 1, getModelValue(model, columns[c]));
       }
 
-      ps.executeUpdate();
+      preparedStatement.executeUpdate();
 
-      rs = ps.getGeneratedKeys();
+      resultSet = preparedStatement.getGeneratedKeys();
 
-      if (rs.next()) {
-        key = rs.getInt(1);
+      if (resultSet.next()) {
+        key = resultSet.getInt(1);
       }
 
       model.setId(key);
       closePreparedStatement();
       closeConnection();
-    } catch (Exception exception) {
+    } catch (SQLException exception) {
       throw new PersistenceException(exception);
     } finally {
-      if (null != rs) {
+      if (null != resultSet) {
         try {
-          rs.close();
+          resultSet.close();
         } catch (SQLException e) {
           // do nothing
         }
@@ -192,35 +200,41 @@ public abstract class AbstractRepository<T extends Model>
   }
 
   /**
+   * Update.
+   *
+   * @param model the model
+   * @param columns the columns
+   * @throws PersistenceException the persistence exception
    * @see net.ljcomputing.repository.impl.ModelRepository#update(net.ljcomputing.model.Model, java.lang.String[])
    */
   public void update(final T model, final String... columns)
       throws PersistenceException {
-    final String primaryKey = "id";
     final String sql = SqlUtils.buildUpdateStatement(table.getTableName(),
-        primaryKey, columns);
+        PRIMARY_KEY, columns);
 
     try {
-      ps = obtainPreparedStatement(sql);
+      preparedStatement = obtainPreparedStatement(sql);
 
       int column = 1;
-      for (Object value : getModelValues(model, columns)) {
-        ps.setObject(column++, value);
+      for (final Object value : getModelValues(model, columns)) {
+        preparedStatement.setObject(column++, value);
       }
 
-      ps.setObject(column, model.getId());
+      preparedStatement.setObject(column, model.getId());
 
-      ps.executeUpdate();
+      preparedStatement.executeUpdate();
       closePreparedStatement();
       closeConnection();
     } catch (SQLException exception) {
-      throw new PersistenceException(exception);
-    } catch (Exception exception) {
       throw new PersistenceException(exception);
     }
   }
 
   /**
+   * Delete.
+   *
+   * @param model the model
+   * @throws PersistenceException the persistence exception
    * @see net.ljcomputing.repository.impl.ModelRepository#delete(net.ljcomputing.model.Model)
    */
   public void delete(final T model) throws PersistenceException {
@@ -228,17 +242,20 @@ public abstract class AbstractRepository<T extends Model>
   }
 
   /**
+   * Delete.
+   *
+   * @param id the id
+   * @throws PersistenceException the persistence exception
    * @see net.ljcomputing.repository.impl.ModelRepository#delete(java.lang.Integer)
    */
   public void delete(final Integer id) throws PersistenceException {
-    final String primaryKey = "id";
     final String sql = SqlUtils.buildDeleteStatement(table.getTableName(),
-        primaryKey);
+        PRIMARY_KEY);
 
     try {
-      ps = obtainPreparedStatement(sql);
-      ps.setObject(1, id);
-      ps.executeUpdate();
+      preparedStatement = obtainPreparedStatement(sql);
+      preparedStatement.setObject(1, id);
+      preparedStatement.executeUpdate();
       closePreparedStatement();
       closeConnection();
     } catch (SQLException exception) {
@@ -247,32 +264,43 @@ public abstract class AbstractRepository<T extends Model>
   }
 
   /**
+   * Read by id.
+   *
+   * @param id the id
+   * @return the t
+   * @throws PersistenceException the persistence exception
    * @see net.ljcomputing.repository.impl.ModelRepository#readById(java.lang.Integer)
    */
+  @SuppressWarnings({ "unchecked" })
   public T readById(final Integer id) throws PersistenceException {
-    final String sql = "select * from " + table.getTableName() + " where id=?";
+    final String sql = "select * from " + table.getTableName() + " where "
+        + PRIMARY_KEY + " =?";
     T model = null;
-    ResultSet rs = null;
+    ResultSet resultSet = null;
 
     try {
-      ps = obtainPreparedStatement(sql);
+      preparedStatement = obtainPreparedStatement(sql);
 
-      ps.setObject(1, id);
+      preparedStatement.setObject(1, id);
 
-      rs = ps.executeQuery();
+      resultSet = preparedStatement.executeQuery();
 
-      while (rs.next()) {
-        model = getConstructor().newInstance(ep, rs);
+      while (resultSet.next()) {
+        Entity entity = (Entity) getModelInstance();
+        entity.populate(entityPopulator, resultSet);
+        model = (T) entity;
       }
 
       closePreparedStatement();
       closeConnection();
-    } catch (Exception exception) {
+    } catch (SQLException | InstantiationException | IllegalAccessException
+        | IllegalArgumentException | NoSuchMethodException
+        | SecurityException exception) {
       throw new PersistenceException(exception);
     } finally {
-      if (null != rs) {
+      if (null != resultSet) {
         try {
-          rs.close();
+          resultSet.close();
         } catch (SQLException e) {
           // do nothing
         }
@@ -283,29 +311,38 @@ public abstract class AbstractRepository<T extends Model>
   }
 
   /**
+   * Read all.
+   *
+   * @return the list
+   * @throws PersistenceException the persistence exception
    * @see net.ljcomputing.repository.impl.ModelRepository#readAll()
    */
+  @SuppressWarnings({ "unchecked" })
   public List<T> readAll() throws PersistenceException {
     final String sql = "select * from " + table.getTableName();
     final List<T> list = new ArrayList<T>();
-    ResultSet rs = null;
+    ResultSet resultSet = null;
 
     try {
-      ps = obtainPreparedStatement(sql);
-      rs = ps.executeQuery();
+      preparedStatement = obtainPreparedStatement(sql);
+      resultSet = preparedStatement.executeQuery();
 
-      while (rs.next()) {
-        list.add(getConstructor().newInstance(ep, rs));
+      while (resultSet.next()) {
+        Entity entity = (Entity) getModelInstance();
+        entity.populate(entityPopulator, resultSet);
+        list.add((T) entity);
       }
 
       closePreparedStatement();
       closeConnection();
-    } catch (Exception exception) {
+    } catch (SQLException | InstantiationException | IllegalAccessException
+        | IllegalArgumentException | NoSuchMethodException
+        | SecurityException exception) {
       throw new PersistenceException(exception);
     } finally {
-      if (null != rs) {
+      if (null != resultSet) {
         try {
-          rs.close();
+          resultSet.close();
         } catch (SQLException e) {
           // do nothing
         }
@@ -321,10 +358,10 @@ public abstract class AbstractRepository<T extends Model>
    * @param model the model
    * @param fieldNames the field names
    * @return the model values
-   * @throws Exception the exception
+   * @throws PersistenceException the persistence exception
    */
   protected Object[] getModelValues(final T model, final String... fieldNames)
-      throws Exception {
+      throws PersistenceException {
     final Object[] values = new Object[fieldNames.length];
 
     for (int f = 0; f < fieldNames.length; f++) {
@@ -340,13 +377,19 @@ public abstract class AbstractRepository<T extends Model>
    * @param model the model
    * @param fieldName the field name
    * @return the model value
-   * @throws Exception the exception
+   * @throws PersistenceException the persistence exception
    */
   protected Object getModelValue(final T model, final String fieldName)
-      throws Exception {
-    final String newFieldName = StringUtils.toMemberCase(fieldName);
-    final Field field = model.getClass().getDeclaredField(newFieldName);
-    field.setAccessible(true);
-    return field.get(model);
+      throws PersistenceException {
+    try {
+      final String newFieldName = StringUtils.toMemberCase(fieldName);
+      final Class<? extends Model> klass = model.getClass();
+      final Field field = klass.getDeclaredField(newFieldName);
+      field.setAccessible(true);
+      return field.get(model);
+    } catch (NoSuchFieldException | SecurityException | IllegalArgumentException
+        | IllegalAccessException exception) {
+      throw new PersistenceException(exception);
+    }
   }
 }
