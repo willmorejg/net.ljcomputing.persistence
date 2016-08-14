@@ -271,7 +271,6 @@ public abstract class AbstractRepository<T extends Model>
    * @throws PersistenceException the persistence exception
    * @see net.ljcomputing.repository.impl.ModelRepository#readById(java.lang.Integer)
    */
-  @SuppressWarnings({ "unchecked" })
   public T readById(final Integer id) throws PersistenceException {
     final String sql = "select * from " + table.getTableName() + " where "
         + PRIMARY_KEY + " =?";
@@ -286,9 +285,7 @@ public abstract class AbstractRepository<T extends Model>
       resultSet = preparedStatement.executeQuery();
 
       while (resultSet.next()) {
-        final Entity entity = (Entity) getModelInstance();
-        entity.populate(entityPopulator, resultSet);
-        model = (T) entity;
+        model = getPersistedModel(resultSet);
       }
 
       closePreparedStatement();
@@ -317,7 +314,6 @@ public abstract class AbstractRepository<T extends Model>
    * @throws PersistenceException the persistence exception
    * @see net.ljcomputing.repository.impl.ModelRepository#readAll()
    */
-  @SuppressWarnings({ "unchecked" })
   public List<T> readAll() throws PersistenceException {
     final String sql = "select * from " + table.getTableName();
     final List<T> list = new ArrayList<T>();
@@ -328,9 +324,7 @@ public abstract class AbstractRepository<T extends Model>
       resultSet = preparedStatement.executeQuery();
 
       while (resultSet.next()) {
-        final Entity entity = (Entity) getModelInstance();
-        entity.populate(entityPopulator, resultSet);
-        list.add((T) entity);
+        list.add(getPersistedModel(resultSet));
       }
 
       closePreparedStatement();
@@ -350,6 +344,26 @@ public abstract class AbstractRepository<T extends Model>
     }
 
     return list;
+  }
+  
+  /**
+   * Gets the persisted model.
+   *
+   * @param resultSet the result set
+   * @return the persisted model
+   * @throws NoSuchMethodException the no such method exception
+   * @throws SecurityException the security exception
+   * @throws InstantiationException the instantiation exception
+   * @throws IllegalAccessException the illegal access exception
+   * @throws PersistenceException the persistence exception
+   */
+  @SuppressWarnings("unchecked")
+  private T getPersistedModel(ResultSet resultSet) 
+      throws NoSuchMethodException, SecurityException, InstantiationException, 
+        IllegalAccessException, PersistenceException {
+    final Entity entity = (Entity) getModelInstance();
+    entity.populate(entityPopulator, resultSet);
+    return (T) entity;    
   }
 
   /**

@@ -34,6 +34,13 @@ public class Person extends AbstractModel implements Model, Entity {
 
   /** The name. */
   private String name;
+  
+  /**
+   * Instantiates a new person.
+   */
+  public Person() {
+    super();
+  }
 
   /**
    * Instantiates a new person.
@@ -51,19 +58,9 @@ public class Person extends AbstractModel implements Model, Entity {
    * @param name the name
    */
   public Person(Integer id, String name) {
+    super();
     setId(id);
     this.name = name;
-  }
-
-  /**
-   * Instantiates a new person.
-   *
-   * @param ep the ep
-   * @param rs the rs
-   * @throws PersistenceException the persistence exception
-   */
-  public Person(EntityPopulator ep, ResultSet rs) throws PersistenceException {
-    populate(ep, rs);
   }
 
   /**

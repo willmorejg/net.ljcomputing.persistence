@@ -45,10 +45,10 @@ import org.junit.Test;
  * 
  * @author James G. Willmore
  */
-public class CrudTests {
+public class CrudTest {
 
   /** The Constant LOGGER. */
-  private final static Logger LOGGER = LoggerFactory.getLogger(CrudTests.class);
+  private final static Logger LOGGER = LoggerFactory.getLogger(CrudTest.class);
 
   /**
    * @throws java.lang.Exception
