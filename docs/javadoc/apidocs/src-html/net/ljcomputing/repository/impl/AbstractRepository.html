@@ -294,7 +294,7 @@
 <span class="sourceLineNo">286</span>      resultSet = preparedStatement.executeQuery();<a name="line.286"></a>
 <span class="sourceLineNo">287</span><a name="line.287"></a>
 <span class="sourceLineNo">288</span>      while (resultSet.next()) {<a name="line.288"></a>
-<span class="sourceLineNo">289</span>        Entity entity = (Entity) getModelInstance();<a name="line.289"></a>
+<span class="sourceLineNo">289</span>        final Entity entity = (Entity) getModelInstance();<a name="line.289"></a>
 <span class="sourceLineNo">290</span>        entity.populate(entityPopulator, resultSet);<a name="line.290"></a>
 <span class="sourceLineNo">291</span>        model = (T) entity;<a name="line.291"></a>
 <span class="sourceLineNo">292</span>      }<a name="line.292"></a>
@@ -336,7 +336,7 @@
 <span class="sourceLineNo">328</span>      resultSet = preparedStatement.executeQuery();<a name="line.328"></a>
 <span class="sourceLineNo">329</span><a name="line.329"></a>
 <span class="sourceLineNo">330</span>      while (resultSet.next()) {<a name="line.330"></a>
-<span class="sourceLineNo">331</span>        Entity entity = (Entity) getModelInstance();<a name="line.331"></a>
+<span class="sourceLineNo">331</span>        final Entity entity = (Entity) getModelInstance();<a name="line.331"></a>
 <span class="sourceLineNo">332</span>        entity.populate(entityPopulator, resultSet);<a name="line.332"></a>
 <span class="sourceLineNo">333</span>        list.add((T) entity);<a name="line.333"></a>
 <span class="sourceLineNo">334</span>      }<a name="line.334"></a>

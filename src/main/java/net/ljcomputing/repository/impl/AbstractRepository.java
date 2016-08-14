@@ -286,7 +286,7 @@ public abstract class AbstractRepository<T extends Model>
       resultSet = preparedStatement.executeQuery();
 
       while (resultSet.next()) {
-        Entity entity = (Entity) getModelInstance();
+        final Entity entity = (Entity) getModelInstance();
         entity.populate(entityPopulator, resultSet);
         model = (T) entity;
       }
@@ -328,7 +328,7 @@ public abstract class AbstractRepository<T extends Model>
       resultSet = preparedStatement.executeQuery();
 
       while (resultSet.next()) {
-        Entity entity = (Entity) getModelInstance();
+        final Entity entity = (Entity) getModelInstance();
         entity.populate(entityPopulator, resultSet);
         list.add((T) entity);
       }
